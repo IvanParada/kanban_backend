@@ -90,6 +90,73 @@ yarn test:cov
 
 Las contribuciones son bienvenidas. Por favor, abre un issue o un pull request para discutir cualquier cambio importante.
 
-## 📄 Licencia
+## � Endpoints
 
-Este proyecto está bajo la licencia [MIT](LICENSE).
+La aplicación expone una API REST bajo el recurso `/tasks`.
+
+### `GET /tasks`
+
+Obtiene la lista completa de todas las tareas.
+
+**Respuesta Exitosa (200 OK):**
+
+```json
+[
+  {
+    "id": "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
+    "title": "Configurar base de datos",
+    "description": "Crear contenedor de Docker para Postgres",
+    "state": "DONE",
+    "createdAt": "2023-10-25T10:00:00.000Z",
+    "updatedAt": "2023-10-25T12:00:00.000Z"
+  }
+]
+```
+
+### `GET /tasks/:id`
+
+Obtiene una tarea específica por su ID (UUID).
+
+**Ejemplo:** `GET /tasks/a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11`
+
+### `POST /tasks`
+
+Crea una nueva tarea.
+
+**Cuerpo de la Petición (JSON):**
+
+```json
+{
+  "title": "Implementar autenticación",
+  "description": "Añadir Login y Registro con JWT",
+  "state": "TODO"
+}
+```
+
+- `title` (Requerido): Título de la tarea.
+- `description` (Opcional): Descripción detallada.
+- `state` (Opcional): Estado inicial. Valores permitidos: `TODO`, `PENDING`, `IN_PROGRESS`, `DONE`. Valor por defecto: `TODO`.
+
+### `PATCH /tasks/:id`
+
+Actualiza una tarea existente. Puedes enviar solo los campos que deseas modificar.
+
+**Cuerpo de la Petición (JSON):**
+
+```json
+{
+  "state": "IN_PROGRESS"
+}
+```
+
+### `DELETE /tasks/:id`
+
+Elimina una tarea por su ID.
+
+**Respuesta Exitosa (200 OK):**
+
+```json
+{
+  "status": "success"
+}
+```
