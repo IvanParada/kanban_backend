@@ -5,7 +5,9 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  ManyToOne,
 } from 'typeorm';
+import { User } from 'src/auth/entities/user.entity';
 
 export enum TaskStatus {
   TODO = 'TODO',
@@ -39,4 +41,7 @@ export class Task {
   createdAt: Date;
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @ManyToOne(() => User, (user) => user.task, { eager: true })
+  user: User;
 }
