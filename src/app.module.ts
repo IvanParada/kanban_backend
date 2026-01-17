@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TasksModule } from './tasks/tasks.module';
 import { AuthModule } from './auth/auth.module';
+import { TaskImagesModule } from './task-images/task-images.module';
 
 @Module({
   imports: [
@@ -22,6 +23,8 @@ import { AuthModule } from './auth/auth.module';
     TasksModule,
 
     AuthModule,
+
+    TaskImagesModule,
   ],
 })
 export class AppModule {}

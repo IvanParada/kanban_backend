@@ -1,4 +1,3 @@
-import { v4 as uuid } from 'uuid';
 import {
   PrimaryGeneratedColumn,
   Entity,
@@ -6,8 +5,10 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   ManyToOne,
+  OneToMany,
 } from 'typeorm';
 import { User } from 'src/auth/entities/user.entity';
+import { TaskImage } from 'src/task-images/entities/task-image.entity';
 
 export enum TaskStatus {
   TODO = 'TODO',
@@ -44,4 +45,7 @@ export class Task {
 
   @ManyToOne(() => User, (user) => user.task, { eager: true })
   user: User;
+
+  @OneToMany(() => TaskImage, (taskImage) => taskImage.task)
+  images: TaskImage[];
 }

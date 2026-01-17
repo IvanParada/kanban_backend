@@ -6,6 +6,8 @@ import {
   Patch,
   Param,
   Delete,
+  ParseUUIDPipe,
+  Query,
 } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
@@ -15,33 +17,37 @@ import { GetUser } from 'src/auth/decorators/get-user.decorator';
 import { User } from 'src/auth/entities/user.entity';
 
 @Controller('tasks')
+@Auth()
 export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
 
   @Post()
-  @Auth()
   create(@Body() createTaskDto: CreateTaskDto, @GetUser() user: User) {
     return this.tasksService.create(createTaskDto, user);
   }
 
   @Get()
-  findAll() {
-    return this.tasksService.findAll();
+  findAll(@GetUser() user: User) {
+    return this.tasksService.findAll(user.id);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.tasksService.findOne(id);
+  findOne(@Param('id', ParseUUIDPipe) id: string, @GetUser() user: User) {
+    return this.tasksService.findOne(id, user.id, 21600);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTaskDto: UpdateTaskDto) {
-    return this.tasksService.update(id, updateTaskDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateTaskDto: UpdateTaskDto,
+    @GetUser() user: User,
+  ) {
+    return this.tasksService.update(id, updateTaskDto, user.id);
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string) {
-    await this.tasksService.remove(id);
+  async remove(@Param('id') id: string, @GetUser() user: User) {
+    await this.tasksService.remove(id, user.id);
     return {
       status: 'success',
     };
