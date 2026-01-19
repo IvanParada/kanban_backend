@@ -1,6 +1,14 @@
-import { IsInt, IsString, Min } from 'class-validator';
+import {
+  IsString,
+  IsNumber,
+  IsArray,
+  ValidateNested,
+  IsOptional,
+  IsUUID,
+} from 'class-validator';
+import { Type } from 'class-transformer';
 
-export class CreateTaskImageDto {
+export class ImageConfirmationDto {
   @IsString()
   key: string;
 
@@ -10,10 +18,20 @@ export class CreateTaskImageDto {
   @IsString()
   mimeType: string;
 
-  @IsInt()
-  @Min(1)
+  @IsNumber()
   size: number;
 
   @IsString()
   originalName: string;
+}
+
+export class CreateTaskImageDto {
+  @IsString()
+  @IsUUID()
+  taskId: string;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ImageConfirmationDto)
+  images: ImageConfirmationDto[];
 }

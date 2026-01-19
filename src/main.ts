@@ -3,13 +3,15 @@ import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { ResponseInterceptor } from './common/response/response.interceptor';
 import { HttpExceptionFilter } from './common/http-exception/http-exception.filter';
+import helmet from 'helmet';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const logger = new Logger('Bootstrap');
 
   app.setGlobalPrefix('api');
-
+  // app.enableCors();
+  // app.use(helmet());
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

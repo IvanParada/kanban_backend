@@ -16,9 +16,6 @@ export class TaskImage {
   @Column({ type: 'text' })
   key: string;
 
-  @Column({ type: 'text' })
-  url: string;
-
   @Column({ type: 'varchar', length: 100 })
   mimeType: string;
 

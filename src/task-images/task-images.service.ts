@@ -25,21 +25,24 @@ export class TaskImagesService {
   async presign(dto: PresignDto, userId: string) {
     await this.getOwnedTask(dto.taskId, userId);
 
-    if (!dto.mimeType.startsWith('image/')) {
+    const checkMime = dto.files.every((f) => f.mimeType.startsWith('image/'));
+    if (!checkMime) {
       throw new ForbiddenException('Solo se permiten imágenes');
     }
 
-    const safeName = dto.filename.replace(/[^\w.\-]/g, '_');
-    const path = `users/${userId}/tasks/${dto.taskId}/${uuid()}-${safeName}`;
+    return Promise.all(
+      dto.files.map(async (f) => {
+        const safeName = f.filename.replace(/[^\w.\-]/g, '_');
+        const path = `users/${userId}/tasks/${dto.taskId}/${uuid()}-${safeName}`;
 
-    const { data, error } = await this.supabase
-      .storage()
-      .createSignedUploadUrl(path);
+        const { data, error } = await this.supabase
+          .storage()
+          .createSignedUploadUrl(path);
 
-    if (error) throw error;
-
-    // data: { signedUrl, path, token }
-    return data;
+        if (error) throw error;
+        return { ...data, originalName: f.filename };
+      }),
+    );
   }
 
   private async getOwnedTask(taskId: string, userId: string) {
@@ -52,36 +55,15 @@ export class TaskImagesService {
     return task;
   }
 
-  async createTaskImage(
-    taskId: string,
-    createTaskImageDto: CreateTaskImageDto,
-    userId: string,
-  ) {
-    const task = await this.getOwnedTask(taskId, userId);
-    const taskImage = this.taskImageRepository.create({
-      ...createTaskImageDto,
-      task,
-    });
+  async confirm(dto: CreateTaskImageDto, userId: string) {
+    const task = await this.getOwnedTask(dto.taskId, userId);
+    const entities = dto.images.map((img) =>
+      this.taskImageRepository.create({
+        ...img,
+        task,
+      }),
+    );
 
-    return this.taskImageRepository.save(taskImage);
-  }
-
-  async getSignedUrl(imageId: string, userId: string, expiresIn = 21600) {
-    const img = await this.taskImageRepository.findOne({
-      where: { id: imageId },
-      relations: { task: { user: true } },
-    });
-
-    if (!img) throw new NotFoundException('Imagen no encontrada');
-    if (img.task.user.id !== userId)
-      throw new ForbiddenException('No es tu imagen');
-
-    const { data, error } = await this.supabase
-      .storage()
-      .createSignedUrl(img.key, expiresIn);
-
-    if (error) throw error;
-
-    return { signedUrl: data.signedUrl, expiresIn };
+    return this.taskImageRepository.save(entities);
   }
 }
