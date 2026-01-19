@@ -66,4 +66,25 @@ export class TaskImagesService {
 
     return this.taskImageRepository.save(entities);
   }
+
+  async refreshSignedUrl(imageId: string, userId: string, expiresIn = 60 * 5) {
+    const img = await this.taskImageRepository.findOne({
+      where: { id: imageId },
+      relations: { task: { user: true } },
+    });
+
+    if (!img) throw new NotFoundException('Image not found');
+
+    if (img.task.user.id !== userId) {
+      throw new NotFoundException('Image not found');
+    }
+
+    const { data, error } = await this.supabase
+      .storage()
+      .createSignedUrl(img.key, expiresIn);
+
+    if (error) throw error;
+
+    return { id: img.id, signedUrl: data.signedUrl, expiresIn };
+  }
 }

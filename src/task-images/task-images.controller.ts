@@ -28,4 +28,14 @@ export class TaskImagesController {
   async confirm(@Body() dto: CreateTaskImageDto, @GetUser() user: User) {
     return this.taskImagesService.confirm(dto, user.id);
   }
+
+  @Get(':imageId/signed-url')
+  refreshSignedUrl(
+    @Param('imageId', ParseUUIDPipe) imageId: string,
+    @GetUser() user: User,
+    @Query('expiresIn') expiresIn?: string,
+  ) {
+    const exp = expiresIn ? Number(expiresIn) : undefined;
+    return this.taskImagesService.refreshSignedUrl(imageId, user.id, exp);
+  }
 }

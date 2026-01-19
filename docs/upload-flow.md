@@ -161,3 +161,7 @@ Consulta la tarea y verás las imágenes vinculadas.
   ]
 }
 ```
+
+SignedUrl tiene expiración, por lo tanto, se debe ejecutar el endpoint de refreshSignedUrl para obtener una nueva url.
+
+**ENDPOINT**: `GET /api/task-images/:imageId/signed-url`
