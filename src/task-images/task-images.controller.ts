@@ -27,6 +27,7 @@ import {
 @ApiBearerAuth('access-token')
 export class TaskImagesController {
   constructor(private readonly taskImagesService: TaskImagesService) {}
+  //TODO: Create and Implement ResponsesDto
 
   @ApiCreatedResponse({
     description: 'The task image has been successfully presigned',
