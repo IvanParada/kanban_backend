@@ -120,7 +120,7 @@ Despues de subir, avisa al backend para guardar la imagen en la base de datos.
     "key": "users/a0ee.../tasks/e4f2.../uuid-captura_error.png",
     "url": "https://xyz.supabase.co/storage/v1/object/public/bucket/...",
     "mimeType": "image/png",
-    "size": 10240,
+    "size": 1024,
     "originalName": "captura_error.png",
     "id": "imagen-uuid-123",
     "created_at": "..."
