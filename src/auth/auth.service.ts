@@ -12,6 +12,8 @@ import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 import { JwtService } from '@nestjs/jwt';
+import { AuthResponseDto } from './dto/response/auth-response.dto';
+import { LoginResponseDto } from './dto/response';
 
 @Injectable()
 export class AuthService {
@@ -20,7 +22,7 @@ export class AuthService {
     private readonly userRepository: Repository<User>,
     private readonly jwtService: JwtService,
   ) {}
-  async create(createUserDto: CreateUserDto) {
+  async create(createUserDto: CreateUserDto): Promise<AuthResponseDto> {
     try {
       const { password, ...rest } = createUserDto;
 
@@ -30,17 +32,21 @@ export class AuthService {
       });
 
       const saved = await this.userRepository.save(user);
-      const { password: _, ...result } = saved;
+
       return {
-        ...result,
-        token: this.getJwtToken({ id: result.id }),
+        id: saved.id,
+        email: saved.email,
+        name: saved.name,
+        isActive: saved.isActive,
+        role: saved.role,
+        token: this.getJwtToken({ id: saved.id }),
       };
     } catch (error) {
       this.handleDBError(error);
     }
   }
 
-  async login(loginUserDto: LoginUserDto) {
+  async login(loginUserDto: LoginUserDto): Promise<LoginResponseDto> {
     const { email, password } = loginUserDto;
 
     const user = await this.userRepository.findOne({
@@ -54,18 +60,21 @@ export class AuthService {
       throw new UnauthorizedException('User not found');
     }
 
-    const { password: _, ...result } = user;
     return {
-      ...result,
-      token: this.getJwtToken({ id: result.id }),
+      id: user.id,
+      email: user.email,
+      token: this.getJwtToken({ id: user.id }),
     };
   }
 
-  async renewToken(user: User) {
-    const { password: _, ...result } = user;
+  async renewToken(user: User): Promise<AuthResponseDto> {
     return {
-      ...result,
-      token: this.getJwtToken({ id: result.id }),
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      isActive: user.isActive,
+      role: user.role,
+      token: this.getJwtToken({ id: user.id }),
     };
   }
 
