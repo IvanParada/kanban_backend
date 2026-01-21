@@ -1,15 +1,16 @@
-FROM node:20-alpine AS build
+FROM node:20-bookworm-slim AS build
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm ci
 
-RUN npm i -D @nestjs/cli
+# Fuerza devDependencies (aunque NODE_ENV=production / NPM_CONFIG_PRODUCTION=true)
+RUN npm ci --include=dev
 
 COPY . .
 RUN npm run build
 
-FROM node:20-alpine
+
+FROM node:20-bookworm-slim
 WORKDIR /app
 ENV NODE_ENV=production
 
@@ -18,5 +19,4 @@ RUN npm ci --omit=dev
 
 COPY --from=build /app/dist ./dist
 
-EXPOSE 3000
-CMD ["npm", "run", "start:prod"]
+CMD ["node", "dist/main.js"]
