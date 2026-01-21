@@ -4,6 +4,8 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 
+RUN npm i -D @nestjs/cli
+
 COPY . .
 RUN npm run build
 
