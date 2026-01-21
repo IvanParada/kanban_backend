@@ -11,6 +11,7 @@ import { TaskImage } from './entities/task-image.entity';
 import { PresignDto } from './dto/presign.dto';
 import { SupabaseService } from 'src/supabase/supabase.service';
 import { v4 as uuid } from 'uuid';
+import { PresignResponseDto } from './dto/response/presign-response.dto';
 
 @Injectable()
 export class TaskImagesService {
@@ -22,7 +23,10 @@ export class TaskImagesService {
     private readonly supabase: SupabaseService,
   ) {}
 
-  async presign(dto: PresignDto, userId: string) {
+  async presign(
+    dto: PresignDto,
+    userId: string,
+  ): Promise<PresignResponseDto[]> {
     await this.getOwnedTask(dto.taskId, userId);
 
     const checkMime = dto.files.every((f) => f.mimeType.startsWith('image/'));
@@ -40,7 +44,12 @@ export class TaskImagesService {
           .createSignedUploadUrl(path);
 
         if (error) throw error;
-        return { ...data, originalName: f.filename };
+        return {
+          signedUrl: data.signedUrl,
+          path,
+          token: data.token,
+          originalName: f.filename,
+        };
       }),
     );
   }

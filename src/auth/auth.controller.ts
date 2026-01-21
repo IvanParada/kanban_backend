@@ -14,14 +14,14 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
-  @ApiWrappedResponse(AuthResponseDto, 'User created')
+  @ApiWrappedResponse(AuthResponseDto, { description: 'User created' })
   @ApiBadRequestResponse({ description: 'User already exists' })
   create(@Body() createUserDto: CreateUserDto) {
     return this.authService.create(createUserDto);
   }
 
   @Post('login')
-  @ApiWrappedResponse(LoginResponseDto, 'User logged in')
+  @ApiWrappedResponse(LoginResponseDto, { description: 'User logged in' })
   @ApiBadRequestResponse({ description: 'User not found' })
   login(@Body() loginUserDto: LoginUserDto) {
     return this.authService.login(loginUserDto);
@@ -30,7 +30,7 @@ export class AuthController {
   @Get('renew-token')
   @Auth()
   @ApiBearerAuth('access-token')
-  @ApiWrappedResponse(AuthResponseDto, 'User token renewed')
+  @ApiWrappedResponse(AuthResponseDto, { description: 'User token renewed' })
   @ApiBadRequestResponse({ description: 'User not found' })
   renewToken(@GetUser() user: User) {
     return this.authService.renewToken(user);

@@ -14,6 +14,7 @@ import { JwtPayload } from './interfaces/jwt-payload.interface';
 import { JwtService } from '@nestjs/jwt';
 import { AuthResponseDto } from './dto/response/auth-response.dto';
 import { LoginResponseDto } from './dto/response';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class AuthService {

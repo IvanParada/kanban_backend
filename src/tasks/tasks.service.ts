@@ -10,6 +10,10 @@ import { Task } from './entities/task.entity';
 import { Repository } from 'typeorm';
 import { User } from 'src/auth/entities/user.entity';
 import { SupabaseService } from 'src/supabase/supabase.service';
+import { CreatedTaskResponseDto } from './dto/response/created-task-response.dto';
+import { plainToInstance } from 'class-transformer';
+import { GetTasksResponseDto } from './dto/response/get-tasks-response.dto';
+import { GetTaskByIdResponseDto } from './dto/response/get-task-by-id.dto';
 
 @Injectable()
 export class TasksService {
@@ -19,51 +23,61 @@ export class TasksService {
     private readonly supabaseService: SupabaseService,
   ) {}
 
-  async create(createTaskDto: CreateTaskDto, user: User) {
+  async create(
+    createTaskDto: CreateTaskDto,
+    user: User,
+  ): Promise<CreatedTaskResponseDto> {
     try {
       const task = this.taskRepository.create({ ...createTaskDto, user });
-      return await this.taskRepository.save(task);
+      const saved = await this.taskRepository.save(task);
+      return plainToInstance(CreatedTaskResponseDto, saved);
     } catch (error) {
       this.handleDBExceptions(error);
     }
   }
 
-  async findAll(userId: string) {
-    return this.taskRepository.find({
+  async findAll(userId: string): Promise<GetTasksResponseDto[]> {
+    const tasks = await this.taskRepository.find({
       where: { user: { id: userId } },
       order: {
         createdAt: 'DESC',
       },
     });
+
+    return plainToInstance(GetTasksResponseDto, tasks);
   }
 
-  async update(id: string, updateTaskDto: UpdateTaskDto, userId: string) {
-    const taskExists = await this.taskRepository.findOne({
+  async update(
+    id: string,
+    updateTaskDto: UpdateTaskDto,
+    userId: string,
+  ): Promise<GetTaskByIdResponseDto> {
+    const task = await this.taskRepository.findOne({
       where: { id, user: { id: userId } },
       select: { id: true },
-    });
-
-    if (!taskExists) {
-      throw new NotFoundException(`Task with id "${id}" not found`);
-    }
-
-    const task = await this.taskRepository.preload({
-      id,
-      ...updateTaskDto,
+      relations: { user: true, images: true },
     });
 
     if (!task) {
       throw new NotFoundException(`Task with id "${id}" not found`);
     }
 
+    this.taskRepository.merge(task, updateTaskDto);
+
     try {
-      return await this.taskRepository.save(task);
+      const saved = await this.taskRepository.save(task);
+      const reloaded = await this.taskRepository.findOne({
+        where: { id: saved.id, user: { id: userId } },
+        relations: { user: true, images: true },
+      });
+
+      return plainToInstance(GetTaskByIdResponseDto, reloaded);
     } catch (error) {
       this.handleDBExceptions(error);
     }
   }
 
-  async remove(id: string, userId: string) {
+  async remove(id: string, userId: string): Promise<void> {
     const { affected } = await this.taskRepository.delete({
       id,
       user: { id: userId },
@@ -74,7 +88,11 @@ export class TasksService {
     }
   }
 
-  async findOne(id: string, userId: string, expiresIn: number = 21600) {
+  async findOne(
+    id: string,
+    userId: string,
+    expiresIn: number = 21600,
+  ): Promise<GetTaskByIdResponseDto> {
     const task = await this.taskRepository.findOne({
       where: { id, user: { id: userId } },
       relations: { images: true, user: true },
@@ -84,7 +102,25 @@ export class TasksService {
       throw new NotFoundException(`Task with id "${id}" not found`);
     }
 
-    if (!task.images?.length) return task;
+    const baseResponse = {
+      id: task.id,
+      title: task.title,
+      description: task.description,
+      state: task.state,
+      createdAt: task.createdAt,
+      updatedAt: task.updatedAt,
+      user: {
+        id: task.user.id,
+        email: task.user.email,
+      },
+    };
+
+    const images = task.images ?? [];
+    if (images.length === 0)
+      return plainToInstance(GetTaskByIdResponseDto, {
+        ...baseResponse,
+        images: [],
+      });
 
     const signed = await Promise.all(
       task.images.map(async (img) => {
@@ -100,15 +136,19 @@ export class TasksService {
 
     const map = new Map(signed.map((x) => [x.id, x.signedUrl]));
 
-    task.images = task.images.map((img: any) => ({
-      ...img,
-      signedUrl: map.get(img.id),
-    }));
-
-    return task;
+    return plainToInstance(GetTaskByIdResponseDto, {
+      ...baseResponse,
+      images: images.map((img) => ({
+        id: img.id,
+        key: img.key,
+        mimeType: img.mimeType,
+        originalName: img.originalName,
+        signedUrl: map.get(img.id),
+      })),
+    });
   }
 
-  private handleDBExceptions(error: any) {
+  private handleDBExceptions(error: any): never {
     if (error.code === '23505') {
       throw new BadRequestException(error.detail);
     }
