@@ -11,8 +11,8 @@ async function bootstrap() {
   const logger = new Logger('Bootstrap');
 
   app.setGlobalPrefix('api');
-  app.enableCors();
-  app.use(helmet());
+  // app.enableCors();
+  // app.use(helmet());
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -36,9 +36,8 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ResponseInterceptor());
   app.useGlobalFilters(new HttpExceptionFilter());
 
-  const port = process.env.PORT ?? 3000;
-  await app.listen(port, '0.0.0.0');
-  logger.log(`Application running on port ${port}`);
+  await app.listen(process.env.PORT ?? 3000);
+  logger.log(`Application running on port ${process.env.PORT ?? 3000}`);
 }
 
 bootstrap();

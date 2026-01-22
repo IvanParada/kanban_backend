@@ -17,7 +17,12 @@ export class AuthController {
   @ApiWrappedResponse(AuthResponseDto, { description: 'User created' })
   @ApiBadRequestResponse({ description: 'User already exists' })
   create(@Body() createUserDto: CreateUserDto) {
-    return this.authService.create(createUserDto);
+    try {
+      return this.authService.create(createUserDto);
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
   }
 
   @Post('login')

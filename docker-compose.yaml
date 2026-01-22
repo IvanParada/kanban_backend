@@ -5,41 +5,14 @@ services:
     image: postgres:15
     container_name: kanban_postgres
     restart: always
+    ports:
+      - "5432:5432"
     environment:
       POSTGRES_DB: kanban_db
       POSTGRES_USER: kanban_user
       POSTGRES_PASSWORD: kanban_pass
     volumes:
       - pgdata:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U kanban_user -d kanban_db"]
-      interval: 5s
-      timeout: 5s
-      retries: 20
-
-  api:
-    build: .
-    container_name: kanban_api
-    restart: always
-    depends_on:
-      postgres:
-        condition: service_healthy
-    ports:
-      - "3000:3000"
-    environment:
-      NODE_ENV: development
-      PORT: 3000
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_NAME: kanban_db
-      DB_USERNAME: kanban_user
-      DB_PASSWORD: kanban_pass
-      JWT_SECRET: ${JWT_SECRET}
-      SUPABASE_URL: ${SUPABASE_URL}
-      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
-      SUPABASE_BUCKET: ${SUPABASE_BUCKET}
 
 volumes:
   pgdata:
