@@ -10,6 +10,7 @@ import { TaskImagesModule } from './task-images/task-images.module';
     ConfigModule.forRoot(),
 
     TypeOrmModule.forRoot({
+      ssl: process.env.STAGE === 'production',
       type: 'postgres',
       host: process.env.DB_HOST,
       port: +process.env.DB_PORT!,
@@ -17,6 +18,7 @@ import { TaskImagesModule } from './task-images/task-images.module';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       autoLoadEntities: true,
+      synchronize: true,
     }),
 
     TasksModule,
