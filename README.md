@@ -2,6 +2,11 @@
 
 Este es el backend para la aplicación Kanban, una API RESTful robusta y escalable desarrollada con **NestJS**. Proporciona gestión de tareas y manejo de imágenes utilizando servicios modernos en la nube.
 
+Desplegado en 
+```
+https://kanban-backend-3opu.onrender.com
+```
+
 ## 🛠 Tecnologías Principales
 
 - **[NestJS](https://nestjs.com/)**: Framework progresivo de Node.js (TypeScript).
