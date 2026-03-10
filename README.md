@@ -4,7 +4,7 @@ Este es el backend para la aplicación Kanban, una API RESTful robusta y escalab
 
 Desplegado en 
 ```
-https://kanban-backend-3opu.onrender.com
+https://kanban-backend-3opu.onrender.com/documentation
 ```
 
 ## 🛠 Tecnologías Principales
@@ -102,7 +102,7 @@ La documentación completa e interactiva de los endpoints está disponible a tra
 
 Una vez que la aplicación esté corriendo (por defecto en el puerto 3000), visita:
 
-👉 **[http://localhost:3000/api](http://localhost:3000/api)**
+👉 **[http://localhost:3000/documentation](http://localhost:3000/documentation)**
 
 En esta interfaz podrás:
 
